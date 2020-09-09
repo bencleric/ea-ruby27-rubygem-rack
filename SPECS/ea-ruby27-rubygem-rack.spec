@@ -4,6 +4,9 @@
 %global pkg ruby27
 %global gem_name rack
 
+# NOTE: I need the version, is there a better way?
+%global ruby_version 2.7.1
+
 # Force Software Collections on
 %global _scl_prefix %{ns_dir}
 %global scl %{ns_name}-%{pkg}
@@ -47,54 +50,32 @@ web servers and layers of software in between
 
 %prep
 %setup -q -c -T
-%{?scl:scl enable %{scl} - << \EOF}
-%gem_install -n %{SOURCE0}
-EOF}
-
-echo "PREP"
-echo "PWD" `pwd`
-tree opt
+%{?scl:scl enable %{scl} - << \EOF} \
+%gem_install -n %{SOURCE0} \
+%{?scl:EOF}
 
 %build
 
 %install
-echo "INSTALL"
-echo "GEMDIR" %{gem_dir}
-echo "BINDIR" %{_bindir}
-echo "INSTDIR" %{gem_instdir}
-echo "DOCDIR" %{gem_docdir}
-echo "CACHE" %{gem_cache}
-echo "LIBDIR" %{gem_libdir}
-echo "PWD" `pwd`
-ls -ld *
-ls -ld .*
-tree opt
-ls -ld opt/cpanel/ea-ruby27/root/usr/share/ruby/gems/ruby-*/gems/*
-BUILD=`pwd`
-cd opt/cpanel/ea-ruby27/root/usr/share/ruby/gems/ruby-*/gems
-GEMSDIR_FULL=`pwd`
-cd -
-GEMSDIR=`echo $GEMSDIR_FULL | sed -e "s:$BUILD/::" -`
-echo $GEMSDIR
+%global gemsbase opt/cpanel/ea-ruby27/root/usr/share/ruby/gems/ruby-%{ruby_version}
+%global gemsdir  %{gemsbase}/gems
+%global rackbase %{gemsdir}/rack-%{version}
 
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/${GEMSDIR}
-cp -a ${GEMSDIR}/* \
-        %{buildroot}/${INSTDIR}/
+mkdir -p %{buildroot}/%{gemsdir}
+cp -ar %{gemsbase}/* %{buildroot}/%{gemsbase}/
 
 mkdir -p %{buildroot}%{_bindir}
-cp -pa %{_bindir}/* \
+cp -pa %{buildroot}/%{rackbase}/bin/* \
         %{buildroot}%{_bindir}/
 
 # Fix anything executable that does not have a shebang
-for file in `find %{buildroot}/$GEMSDIR -type f -perm /a+x`; do
-    echo "FILE01" $file
+for file in `find %{buildroot}/%{gemsdir} -type f -perm /a+x`; do
     [ -z "`head -n 1 $file | grep \"^#!/\"`" ] && chmod -v 644 $file
 done
 
 # Find files with a shebang that do not have executable permissions
-for file in `find %{buildroot}/$GEMSDIR -type f ! -perm /a+x -name "*.rb"`; do
-    echo "FILE02" $file
+for file in `find %{buildroot}/%{gemsdir} -type f ! -perm /a+x -name "*.rb"`; do
     [ ! -z "`head -n 1 $file | grep \"^#!/\"`" ] && chmod -v 755 $file
 done
 
@@ -102,22 +83,22 @@ done
 rm -rf %{buildroot}
 
 %files
-%dir %{gem_instdir}
-%doc %{gem_docdir}
-%doc %{gem_instdir}/CHANGELOG.md
-%doc %{gem_instdir}/Rakefile
-%doc %{gem_instdir}/README.rdoc
-%doc %{gem_instdir}/SPEC.rdoc
-%doc %{gem_instdir}/example
-%doc %{gem_instdir}/MIT-LICENSE
-%doc %{gem_instdir}/contrib
-%doc %{gem_instdir}/CONTRIBUTING.md
-%{gem_instdir}/%{gem_name}.gemspec
-%{gem_libdir}
-%{gem_instdir}/bin
+%dir /%{rackbase}
+%doc /%{gemsbase}/doc
+%doc /%{rackbase}/CHANGELOG.md
+%doc /%{rackbase}/Rakefile
+%doc /%{rackbase}/README.rdoc
+%doc /%{rackbase}/SPEC.rdoc
+%doc /%{rackbase}/example
+%doc /%{rackbase}/MIT-LICENSE
+%doc /%{rackbase}/contrib
+%doc /%{rackbase}/CONTRIBUTING.md
+/%{rackbase}/%{gem_name}.gemspec
+/%{gemsbase}/specifications/rack-%{version}.gemspec
+/%{rackbase}/lib
+/%{rackbase}/bin
 %{_bindir}/rackup
-%exclude %{gem_cache}
-%{gem_spec}
+%exclude /%{gemsbase}/cache
 
 %changelog
 * Tue Sep 08 2020 Julian Brown <julian.browny@cpanel.net> - 2.2.3-1
