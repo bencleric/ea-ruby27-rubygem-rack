@@ -32,8 +32,6 @@ Requires:       %{?scl_prefix}ruby(rubygems)
 Requires:       %{?scl_prefix}ruby(release)
 %{?scl:Requires:%scl_runtime}
 
-BuildRequires:  tree
-
 BuildRequires:  %{?scl_prefix}ruby
 BuildRequires:  %{?scl_prefix}rubygems-devel
 BuildRequires:  scl-utils
