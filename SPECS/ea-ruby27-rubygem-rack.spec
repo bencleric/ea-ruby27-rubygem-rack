@@ -55,25 +55,35 @@ web servers and layers of software in between
 %build
 
 %install
-%global gemsbase opt/cpanel/ea-ruby27/root/usr/share/ruby/gems/ruby-%{ruby_version}
-%global gemsdir  %{gemsbase}/gems
-%global rackbase %{gemsdir}/rack-%{version}
+echo "FILE LIST" `pwd`
+find . -type f -print
+echo "END FILE LIST"
 
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/%{gemsdir}
-cp -ar %{gemsbase}/* %{buildroot}/%{gemsbase}/
+
+%global gemsbase opt/cpanel/ea-ruby27/root/usr/share/gems
+%global gemsdir  %{gemsbase}/gems
+%global gemsrack %{gemsdir}/rack-%{version}
+
+mkdir -p %{buildroot}/%{gemsrack}
+mkdir -p %{buildroot}/%{gemsbase}/specifications
+mkdir -p %{buildroot}/%{gemsbase}/doc/rack-%{version}
+
+cp -ar ./%{gemsbase}/doc/rack-%{version}/* %{buildroot}/%{gemsbase}/doc/rack-%{version}
+cp -ar ./%{gemsdir}/rack-%{version}/* %{buildroot}/%{gemsrack}
+cp -a  ./%{gemsbase}/specifications/rack-%{version}.gemspec %{buildroot}/%{gemsbase}/specifications/rack-%{version}.gemspec
 
 mkdir -p %{buildroot}%{_bindir}
-cp -pa %{buildroot}/%{rackbase}/bin/* \
+cp -pa %{buildroot}/%{gemsrack}/bin/* \
         %{buildroot}%{_bindir}/
 
 # Fix anything executable that does not have a shebang
-for file in `find %{buildroot}/%{gemsdir} -type f -perm /a+x`; do
+for file in `find %{buildroot}/%{gemsrack} -type f -perm /a+x`; do
     [ -z "`head -n 1 $file | grep \"^#!/\"`" ] && chmod -v 644 $file
 done
 
 # Find files with a shebang that do not have executable permissions
-for file in `find %{buildroot}/%{gemsdir} -type f ! -perm /a+x -name "*.rb"`; do
+for file in `find %{buildroot}/%{gemsrack} -type f ! -perm /a+x -name "*.rb"`; do
     [ ! -z "`head -n 1 $file | grep \"^#!/\"`" ] && chmod -v 755 $file
 done
 
@@ -81,22 +91,19 @@ done
 rm -rf %{buildroot}
 
 %files
-%dir /%{rackbase}
+%dir /%{gemsrack}
 %doc /%{gemsbase}/doc
-%doc /%{rackbase}/CHANGELOG.md
-%doc /%{rackbase}/Rakefile
-%doc /%{rackbase}/README.rdoc
-%doc /%{rackbase}/SPEC.rdoc
-%doc /%{rackbase}/example
-%doc /%{rackbase}/MIT-LICENSE
-%doc /%{rackbase}/contrib
-%doc /%{rackbase}/CONTRIBUTING.md
-/%{rackbase}/%{gem_name}.gemspec
-/%{gemsbase}/specifications/rack-%{version}.gemspec
-/%{rackbase}/lib
-/%{rackbase}/bin
+%doc /%{gemsrack}/CHANGELOG.md
+%doc /%{gemsrack}/Rakefile
+%doc /%{gemsrack}/README.rdoc
+%doc /%{gemsrack}/SPEC.rdoc
+%doc /%{gemsrack}/example
+%doc /%{gemsrack}/MIT-LICENSE
+%doc /%{gemsrack}/contrib
+%doc /%{gemsrack}/CONTRIBUTING.md
+/%{gemsrack}
+/%{gemsbase}/specifications
 %{_bindir}/rackup
-%exclude /%{gemsbase}/cache
 
 %changelog
 * Tue Sep 08 2020 Julian Brown <julian.browny@cpanel.net> - 2.2.3-1
