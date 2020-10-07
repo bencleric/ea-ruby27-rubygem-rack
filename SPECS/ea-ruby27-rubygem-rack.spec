@@ -55,10 +55,6 @@ web servers and layers of software in between
 %build
 
 %install
-echo "FILE LIST" `pwd`
-find . -type f -print
-echo "END FILE LIST"
-
 rm -rf %{buildroot}
 
 %global gemsbase opt/cpanel/ea-ruby27/root/usr/share/gems
