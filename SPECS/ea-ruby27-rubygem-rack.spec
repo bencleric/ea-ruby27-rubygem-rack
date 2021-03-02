@@ -5,7 +5,7 @@
 %global gem_name rack
 
 # NOTE: I need the version, is there a better way?
-%global ruby_version 2.7.1
+%global ruby_version 2.7.2
 
 # Force Software Collections on
 %global _scl_prefix %{ns_dir}
@@ -102,6 +102,9 @@ rm -rf %{buildroot}
 %{_bindir}/rackup
 
 %changelog
+* Mon Mar 01 2021 Cory McIntire <cory@cpanel.net> - 2.2.3-2
+- EA-9609: Update global_version for ea-ruby27 v2.7.2
+
 * Tue Sep 08 2020 Julian Brown <julian.browny@cpanel.net> - 2.2.3-1
-- ZC-7510 - initial rubygem rack for Ruby2.7
+- ZC-7510: initial rubygem rack for Ruby2.7
 
