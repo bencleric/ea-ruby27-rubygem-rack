@@ -4,8 +4,7 @@
 %global pkg ruby27
 %global gem_name rack
 
-# NOTE: I need the version, is there a better way?
-%global ruby_version 2.7.2
+%global ruby_version %(/opt/cpanel/ea-ruby27/root/usr/bin/ruby -e 'puts %RUBY_VERSION')
 
 # Force Software Collections on
 %global _scl_prefix %{ns_dir}
@@ -17,7 +16,7 @@
 %{?scl:%scl_package rubygem-%{gem_name}}
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 1
+%define release_prefix 2
 
 Name:           %{?scl_prefix}rubygem-%{gem_name}
 Summary:        Common API for connecting web frameworks, web servers and layers of software
@@ -102,6 +101,9 @@ rm -rf %{buildroot}
 %{_bindir}/rackup
 
 %changelog
+* Tue Jun 29 2021 Julian Brown <julian.brown@cpanel.net> - 2.2.3-2
+- ZC-9033: provide reliable way to get the ruby_version
+
 * Mon Mar 01 2021 Cory McIntire <cory@cpanel.net> - 2.2.3-2
 - EA-9609: Update global_version for ea-ruby27 v2.7.2
 
